@@ -5,6 +5,8 @@ import { ModuleWithProviders, NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 
+import { OpenVidu } from 'openvidu-browser';
+
 import { DeleteDialogComponent } from './components/dialogs/delete-recording.component';
 import { DialogTemplateComponent } from './components/dialogs/dialog.component';
 import { RecordingDialogComponent } from './components/dialogs/recording-dialog.component';
@@ -158,4 +160,8 @@ export class OpenViduAngularModule {
 			providers: [OpenViduAngularConfigService, { provide: 'OPENVIDU_ANGULAR_CONFIG', useValue: libConfig }]
 		};
 	}
+}
+
+if (typeof globalThis !== 'undefined') {
+    globalThis['OpenVidu'] = OpenVidu;
 }

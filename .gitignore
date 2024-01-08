@@ -1,5 +1,6 @@
 !*/target/
 */target/*
+.DS_Store
 !openvidu-java-client/target/openvidu-java-client.jar
 
 /target

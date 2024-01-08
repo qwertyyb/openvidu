@@ -48,6 +48,7 @@ import { PlatformService } from '../../services/platform/platform.service';
 import { RecordingService } from '../../services/recording/recording.service';
 import { TranslateService } from '../../services/translate/translate.service';
 import { VirtualBackgroundService } from '../../services/virtual-background/virtual-background.service';
+import { OpenViduRole } from '../../models/participant.model';
 
 /**
  * @internal
@@ -301,12 +302,13 @@ export class SessionComponent implements OnInit, OnDestroy {
 		this.session.on('connectionCreated', async (event: ConnectionEvent) => {
 			const connectionId = event.connection?.connectionId;
 			const connectionNickname: string = this.participantService.getNicknameFromConnectionData(event.connection.data);
+			const role = this.participantService.getRoleFromConnectionData(event.connection.data);
 			const isRemoteConnection: boolean = !this.openviduService.isMyOwnConnection(connectionId);
 			const isCameraConnection: boolean = !connectionNickname?.includes(`_${VideoType.SCREEN}`);
 			const nickname = this.participantService.getMyNickname();
 			const data = event.connection?.data;
 
-			if (isRemoteConnection && isCameraConnection) {
+			if (isRemoteConnection && isCameraConnection && role !== OpenViduRole.SUBSCRIBER) {
 				// Adding participant when connection is created and it's not screen
 				this.participantService.addRemoteConnection(connectionId, data, null);
 

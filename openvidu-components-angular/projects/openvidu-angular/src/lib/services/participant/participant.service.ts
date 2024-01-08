@@ -455,6 +455,17 @@ export class ParticipantService {
 	/**
 	 * @internal
 	 */
+	getRoleFromConnectionData(data: string): string | undefined | null {
+		try {
+			return JSON.parse(data).role
+		} catch (error) {
+			return;
+		}
+	}
+
+	/**
+	 * @internal
+	 */
 	setRemoteNickname(connectionId: string, nickname: string) {
 		const participant = this.getRemoteParticipantByConnectionId(connectionId);
 		if (participant) {

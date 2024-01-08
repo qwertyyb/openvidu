@@ -6,7 +6,8 @@ import { VideoType } from './video-type.model';
  */
 export enum OpenViduRole {
 	MODERATOR = 'MODERATOR',
-	PUBLISHER = 'PUBLISHER'
+	PUBLISHER = 'PUBLISHER',
+	SUBSCRIBER = 'SUBSCRIBER'
 }
 
 export interface StreamModel {
