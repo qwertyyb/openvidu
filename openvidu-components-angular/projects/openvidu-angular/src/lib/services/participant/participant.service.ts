@@ -5,6 +5,7 @@ import { ILogger } from '../../models/logger.model';
 import {
 	OpenViduRole,
 	ParticipantAbstractModel,
+	ParticipantMode,
 	ParticipantModel,
 	ParticipantProperties,
 	StreamModel
@@ -449,6 +450,14 @@ export class ParticipantService {
 			return JSON.parse(dataClean).clientData;
 		} catch (error) {
 			return 'OpenVidu_User';
+		}
+	}
+
+	getModeFromConnectionData(data: string): ParticipantMode {
+		try {
+			return JSON.parse(data).mode as ParticipantMode
+		} catch (err) {
+			return ParticipantMode.PARTICIPANT
 		}
 	}
 

@@ -12,7 +12,7 @@ export class ParticipantStreamsPipe implements PipeTransform {
 			if (Array.isArray(participants)) {
 				streams = participants.map(p => p.getAvailableConnections()).flat();
 			} else {
-				streams = participants.getAvailableConnections();
+				streams = participants.getAvailableConnections().filter(item => !item.participant?.isViewer())
 			}
 		}
 		return streams;

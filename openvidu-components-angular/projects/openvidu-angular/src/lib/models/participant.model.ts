@@ -9,6 +9,11 @@ export enum OpenViduRole {
 	PUBLISHER = 'PUBLISHER'
 }
 
+export enum ParticipantMode {
+	VIEWER = 'VIEWER',
+	PARTICIPANT = 'PARTICIPANT'
+}
+
 export interface StreamModel {
 	/**
 	 * Whether the stream is available or not
@@ -66,6 +71,7 @@ export abstract class ParticipantAbstractModel {
 	nickname: string;
 	colorProfile: string;
 	isMutedForcibly: boolean;
+	mode = ParticipantMode.PARTICIPANT;
 
 	constructor(props: ParticipantProperties, model?: StreamModel) {
 		this.id = props.id || Math.random().toString(32).replace('.','_');
@@ -219,6 +225,10 @@ export abstract class ParticipantAbstractModel {
 	 */
 	isLocal(): boolean {
 		return this.local;
+	}
+
+	isViewer(): boolean {
+		return this.mode === ParticipantMode.VIEWER
 	}
 
 	/**

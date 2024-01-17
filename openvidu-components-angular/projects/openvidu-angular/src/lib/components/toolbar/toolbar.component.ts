@@ -28,7 +28,7 @@ import { BroadcastingStatus } from '../../models/broadcasting.model';
 import { ChatMessage } from '../../models/chat.model';
 import { ILogger } from '../../models/logger.model';
 import { PanelEvent, PanelType } from '../../models/panel.model';
-import { OpenViduRole, ParticipantAbstractModel } from '../../models/participant.model';
+import { OpenViduRole, ParticipantAbstractModel, ParticipantMode } from '../../models/participant.model';
 import { RecordingInfo, RecordingStatus } from '../../models/recording.model';
 import { ActionService } from '../../services/action/action.service';
 import { BroadcastingService } from '../../services/broadcasting/broadcasting.service';
@@ -144,6 +144,8 @@ export class ToolbarComponent implements OnInit, OnDestroy, AfterViewInit {
 	/**
 	 * Provides event notifications that fire when leave button has been clicked.
 	 */
+	@Output() onJoinButtonClicked: EventEmitter<void> = new EventEmitter<void>();
+
 	@Output() onLeaveButtonClicked: EventEmitter<void> = new EventEmitter<any>();
 
 	/**
@@ -551,6 +553,14 @@ export class ToolbarComponent implements OnInit, OnDestroy, AfterViewInit {
 				);
 			}
 		}
+	}
+
+	joinSession() {
+		this.log.d('Join session...');
+		this.openviduService.publishCamera(this.participantService.getMyCameraPublisher());
+		this.participantService.getLocalParticipant().mode = ParticipantMode.PARTICIPANT;
+		this.participantService.updateLocalParticipant();
+		this.onJoinButtonClicked.emit();
 	}
 
 	/**

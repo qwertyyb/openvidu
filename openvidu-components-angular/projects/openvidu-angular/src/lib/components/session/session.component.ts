@@ -48,6 +48,7 @@ import { PlatformService } from '../../services/platform/platform.service';
 import { RecordingService } from '../../services/recording/recording.service';
 import { TranslateService } from '../../services/translate/translate.service';
 import { VirtualBackgroundService } from '../../services/virtual-background/virtual-background.service';
+import { ParticipantMode } from '../../models/participant.model';
 
 /**
  * @internal
@@ -254,27 +255,38 @@ export class SessionComponent implements OnInit, OnDestroy {
 	private async connectToSession(): Promise<void> {
 		try {
 			const participant = this.participantService.getLocalParticipant();
+			if (location.href.includes('isViewer=1')) {
+				participant.mode = ParticipantMode.VIEWER
+			}
 			const nickname = participant.getNickname();
 			const participantId = participant.id;
 			const screenPublisher = this.participantService.getMyScreenPublisher();
 			const cameraPublisher = this.participantService.getMyCameraPublisher();
 
-
 			if (participant.hasCameraAndScreenActives()) {
 
-				const webcamSessionId = await this.openviduService.connectWebcamSession(participantId, nickname);
+				const webcamSessionId = await this.openviduService.connectWebcamSession(participantId, nickname, participant.mode);
 				if (webcamSessionId) this.participantService.setMyCameraConnectionId(webcamSessionId);
 
 				const screenSessionId = await this.openviduService.connectScreenSession(participantId, nickname);
 				if (screenSessionId) this.participantService.setMyScreenConnectionId(screenSessionId);
 
+				if (participant.isViewer()) {
+					return;
+				}
 				await this.openviduService.publishCamera(cameraPublisher);
 				await this.openviduService.publishScreen(screenPublisher);
 			} else if (participant.hasOnlyScreenActive()) {
 				await this.openviduService.connectScreenSession(participantId, nickname);
+				if (participant.isViewer()) {
+					return;
+				}
 				await this.openviduService.publishScreen(screenPublisher);
 			} else {
-				await this.openviduService.connectWebcamSession(participantId, nickname);
+				await this.openviduService.connectWebcamSession(participantId, nickname, participant.mode);
+				if (participant.isViewer()) {
+					return;
+				}
 				await this.openviduService.publishCamera(cameraPublisher);
 			}
 		} catch (error) {
@@ -305,8 +317,9 @@ export class SessionComponent implements OnInit, OnDestroy {
 			const isCameraConnection: boolean = !connectionNickname?.includes(`_${VideoType.SCREEN}`);
 			const nickname = this.participantService.getMyNickname();
 			const data = event.connection?.data;
+			const isViewer = this.participantService.getModeFromConnectionData(data) == ParticipantMode.VIEWER
 
-			if (isRemoteConnection && isCameraConnection) {
+			if (isRemoteConnection && isCameraConnection && !isViewer) {
 				// Adding participant when connection is created and it's not screen
 				this.participantService.addRemoteConnection(connectionId, data, null);
 

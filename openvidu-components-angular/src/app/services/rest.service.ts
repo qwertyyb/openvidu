@@ -22,7 +22,8 @@ export class RestService {
 	private baseHref: string;
 
 	constructor(private http: HttpClient) {
-		this.baseHref = '/' + (!!window.location.pathname.split('/')[1] ? window.location.pathname.split('/')[1] + '/' : '');
+		this.baseHref = 'https://webrtc.qwertyyb.cn/web-call/api/v1/';
+		// this.baseHref = '/' + (!!window.location.pathname.split('/')[1] ? window.location.pathname.split('/')[1] + '/' : '');
 	}
 	async getToken(sessionId: string, openviduServerUrl?: string, openviduSecret?: string): Promise<string> {
 		if (!!openviduServerUrl && !!openviduSecret) {

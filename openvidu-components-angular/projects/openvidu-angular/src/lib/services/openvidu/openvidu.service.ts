@@ -23,6 +23,7 @@ import { DeviceService } from '../device/device.service';
 import { LoggerService } from '../logger/logger.service';
 import { ParticipantService } from '../participant/participant.service';
 import { PlatformService } from '../platform/platform.service';
+import { ParticipantMode } from '../../models/participant.model';
 
 @Injectable({
 	providedIn: 'root'
@@ -201,7 +202,7 @@ export class OpenViduService {
 	 * @internal
 	 * Connects to webcam session using webcam token.
 	 */
-	async connectWebcamSession(participantId: string, nickname: string): Promise<string | undefined> {
+	async connectWebcamSession(participantId: string, nickname: string, mode: ParticipantMode): Promise<string | undefined> {
 		if (this.isWebcamSessionConnected()) {
 			this.log.d('Webcam session is already connected');
 			return undefined;
@@ -211,7 +212,8 @@ export class OpenViduService {
 		await this.webcamSession.connect(this.getWebcamToken(), {
 			clientData: nickname,
 			participantId,
-			type: VideoType.CAMERA
+			type: VideoType.CAMERA,
+			mode,
 		});
 
 		return this.webcamSession.connection.connectionId;
