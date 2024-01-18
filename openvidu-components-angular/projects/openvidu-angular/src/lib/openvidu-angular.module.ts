@@ -59,6 +59,7 @@ import { AudioDevicesComponent } from './components/settings/audio-devices/audio
 import { CaptionsSettingComponent } from './components/settings/captions/captions.component';
 import { LangSelectorComponent } from './components/settings/lang-selector/lang-selector.component';
 import { NicknameInputComponent } from './components/settings/nickname-input/nickname-input.component';
+import { ModeSelectorComponent } from './components/settings/mode-selector/mode-selector.component';
 import { VideoDevicesComponent } from './components/settings/video-devices/video-devices.component';
 import { CustomBreakPointsProvider, CustomLayoutExtensionDirective } from './config/custom-flexlayout-breakpoints';
 import { ApiDirectiveModule } from './directives/api/api.directive.module';
@@ -96,6 +97,7 @@ const privateComponents = [
 	VideoDevicesComponent,
 	AudioDevicesComponent,
 	NicknameInputComponent,
+    ModeSelectorComponent,
 	LangSelectorComponent,
 	CaptionsSettingComponent
 ];

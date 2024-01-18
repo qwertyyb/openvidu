@@ -246,6 +246,14 @@ export abstract class ParticipantAbstractModel {
 		return this.nickname;
 	}
 
+	setMode(mode: ParticipantMode) {
+		this.mode = mode;
+	}
+
+	getMode() {
+		return this.mode;
+	}
+
 	/**
 	 * @internal
 	 */

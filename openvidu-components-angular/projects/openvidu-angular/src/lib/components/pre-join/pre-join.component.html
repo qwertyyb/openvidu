@@ -47,6 +47,12 @@
 					<ov-nickname-input></ov-nickname-input>
 				</div>
 
+				<div fxFlex.gt-sm="100%" fxFlex.lt-md="33%" fxLayoutAlign="center center" fxFlexFill class="mode-container">
+					<h4 *ngIf="windowSize >= 960">{{ 'PREJOIN.MODE' | translate }}</h4>
+					<hr *ngIf="windowSize >= 960" />
+					<ov-user-mode-selector></ov-user-mode-selector>
+				</div>
+
 				<div fxFlex.gt-sm="100%" fxFlex.lt-md="33%" fxLayoutAlign="center center" fxFlexFill class="buttons-container">
 					<h4 *ngIf="windowSize >= 960">{{ 'PREJOIN.DEVICE_SECTION' | translate }}</h4>
 					<hr *ngIf="windowSize >= 960" />

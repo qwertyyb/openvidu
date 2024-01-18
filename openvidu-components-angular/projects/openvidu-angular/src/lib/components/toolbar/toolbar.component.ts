@@ -372,6 +372,8 @@ export class ToolbarComponent implements OnInit, OnDestroy, AfterViewInit {
 	 */
 	isSessionCreator: boolean = false;
 
+	isViewer: boolean = this.participantService.getLocalParticipant().isViewer();
+
 	/**
 	 * @ignore
 	 */
@@ -455,6 +457,7 @@ export class ToolbarComponent implements OnInit, OnDestroy, AfterViewInit {
 		this.hasVideoDevices = this.oVDevicesService.hasVideoDeviceAvailable();
 		this.hasAudioDevices = this.oVDevicesService.hasAudioDeviceAvailable();
 		this.session = this.openviduService.getWebcamSession();
+		this.isViewer = this.participantService.getLocalParticipant().isViewer();
 
 		this.subscribeToUserMediaProperties();
 		this.subscribeToReconnection();
@@ -558,8 +561,7 @@ export class ToolbarComponent implements OnInit, OnDestroy, AfterViewInit {
 	joinSession() {
 		this.log.d('Join session...');
 		this.openviduService.publishCamera(this.participantService.getMyCameraPublisher());
-		this.participantService.getLocalParticipant().mode = ParticipantMode.PARTICIPANT;
-		this.participantService.updateLocalParticipant();
+		this.participantService.setMyMode(ParticipantMode.PARTICIPANT);
 		this.onJoinButtonClicked.emit();
 	}
 
@@ -717,6 +719,7 @@ export class ToolbarComponent implements OnInit, OnDestroy, AfterViewInit {
 				this.isAudioActive = p.hasAudioActive();
 				this.isScreenShareActive = p.isScreenActive();
 				this.isSessionCreator = p.getRole() === OpenViduRole.MODERATOR;
+				this.isViewer = p.isViewer();
 				this.storageSrv.setAudioMuted(!this.isAudioActive);
 				this.storageSrv.setVideoMuted(!this.isWebcamVideoActive);
 				this.cd.markForCheck();

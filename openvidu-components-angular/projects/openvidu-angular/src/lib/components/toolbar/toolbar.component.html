@@ -27,7 +27,7 @@
 			</div>
 		</div>
 	</div>
-	<div fxFlex="60%" fxFlexOrder="2" fxLayoutAlign="center center" id="media-buttons-container">
+	<div fxFlex="60%" fxFlexOrder="2" *ngIf="!isViewer" fxLayoutAlign="center center" id="media-buttons-container">
 		<!-- Microphone button -->
 		<button
 			id="mic-btn"
@@ -194,15 +194,15 @@
 			<ng-container *ngTemplateOutlet="toolbarAdditionalButtonsTemplate"></ng-container>
 		</ng-container>
 
-
-		<!-- Join the session for viewer -->
-		<button mat-icon-button id="join-btn" (click)="joinSession()">
-			<mat-icon matTooltip="{{ 'TOOLBAR.JOIN' | translate }}">login</mat-icon>
-		</button>
-
 		<!-- Leave session button -->
 		<button mat-icon-button *ngIf="showLeaveButton" (click)="leaveSession()" id="leave-btn">
 			<mat-icon matTooltip="{{ 'TOOLBAR.LEAVE' | translate }}">call_end</mat-icon>
+		</button>
+	</div>
+	<div fxFlex="60%" fxFlexOrder="2" *ngIf="isViewer" fxLayoutAlign="center center" id="media-buttons-container">
+		<!-- Join the session for viewer -->
+		<button mat-icon-button id="join-btn" (click)="joinSession()">
+			<mat-icon matTooltip="{{ 'TOOLBAR.JOIN' | translate }}">login</mat-icon>
 		</button>
 	</div>
 	<div fxFlex="20%" fxFlexOrder="3" fxLayoutAlign="end center" id="menu-buttons-container">

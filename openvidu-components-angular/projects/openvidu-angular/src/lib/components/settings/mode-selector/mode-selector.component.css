@@ -1,0 +1,15 @@
+.mode-container-element {
+  width: 100%;
+  display: flex;
+}
+#mode-button {
+  margin: auto 10px auto auto;
+}
+#mode-selector-form {
+  flex: 1;
+}
+.mode-container-element mat-form-field {
+	width: 100%;
+	margin-top: 10px;
+	color: #000000;
+}

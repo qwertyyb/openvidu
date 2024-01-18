@@ -154,6 +154,11 @@ export class ParticipantService {
 		this.localParticipant.setCameraConnectionId(connectionId);
 	}
 
+	setMyMode(mode: ParticipantMode) {
+		this.localParticipant.setMode(mode);
+		this.updateLocalParticipant();
+	}
+
 	/**
 	 * @internal
 	 */

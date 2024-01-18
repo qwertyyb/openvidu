@@ -92,7 +92,7 @@ hr {
 	padding-right: 0px;
 }
 
-.nickname-container {
+.nickname-container, .mode-container {
 	/* padding: 10px; */
 	display: block !important;
 	margin-bottom: 0px !important;
@@ -131,7 +131,8 @@ hr {
 	}
 	.nickname-container,
 	.buttons-container,
-	.join-btn-container {
+	.join-btn-container,
+	.mode-container {
 		width: 90% !important;
 		margin: auto;
 	}
@@ -152,7 +153,8 @@ hr {
 
 	.nickname-container,
 	.buttons-container,
-	.join-btn-container {
+	.join-btn-container,
+	.mode-container {
 		width: 80% !important;
 		min-width: 80% !important;
 		margin: auto;

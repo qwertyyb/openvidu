@@ -1,0 +1,23 @@
+<div class="mode-container-element">
+	<button
+		mat-icon-button
+		id="mode-button"
+	>
+		<mat-icon
+			matTooltip="{{ 'TOOLBAR.MUTE_VIDEO' | translate }}"
+			id="videocam"
+		>
+			slideshow
+		</mat-icon>
+	</button>
+	<mat-form-field id="mode-selector-form">
+		<mat-label>{{ 'PREJOIN.USERMODE' | translate }}</mat-label>
+		<mat-select
+			[value]="selectedMode"
+			(selectionChange)="onModeSelected($event)"
+		>
+      <mat-option value="VIEWER" id="option-viewer">{{ 'USERMODE.VIEWER' | translate }}</mat-option>
+      <mat-option value="PARTICIPANT" id="option-participant">{{ 'USERMODE.PARTICIPANT' | translate }}</mat-option>
+		</mat-select>
+	</mat-form-field>
+</div>

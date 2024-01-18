@@ -53,9 +53,9 @@ export class TranslateService {
 	async setLanguage(lang: string) {
 		const matchingLang = this.langOptions.find((l) => l.lang === lang);
 		if (matchingLang) {
-			this.currentLang = await this.getLangData(lang);
 			this.langSelected = matchingLang;
 			this._langSelected.next(this.langSelected);
+			this.currentLang = await this.getLangData(lang);
 		}
 	}
 
@@ -81,16 +81,16 @@ export class TranslateService {
 	}
 
 	private async updateLangSelected() {
+		let langOpt = this._langSelected.value;
 		const storageLang = this.storageService.getLang();
-		const langOpt = this.langOptions.find((opt) => opt.lang === storageLang);
+		langOpt = langOpt || this.langOptions.find((opt) => opt.lang === storageLang);
 		if (storageLang && langOpt) {
 			this.langSelected = langOpt;
 		} else {
 			this.langSelected = this.langOptions[0];
 		}
-		this.currentLang = await this.getLangData(this.langSelected.lang);
 		this._langSelected.next(this.langSelected);
-
+		this.currentLang = await this.getLangData(this.langSelected.lang);
 	}
 
 	private async getLangData(lang: string): Promise<void> {
