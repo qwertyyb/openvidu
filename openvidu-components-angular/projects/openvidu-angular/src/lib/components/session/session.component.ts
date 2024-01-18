@@ -313,6 +313,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 		this.session.on('connectionCreated', async (event: ConnectionEvent) => {
 			const connectionId = event.connection?.connectionId;
 			const connectionNickname: string = this.participantService.getNicknameFromConnectionData(event.connection.data);
+			const role = this.participantService.getRoleFromConnectionData(event.connection.data);
 			const isRemoteConnection: boolean = !this.openviduService.isMyOwnConnection(connectionId);
 			const isCameraConnection: boolean = !connectionNickname?.includes(`_${VideoType.SCREEN}`);
 			const nickname = this.participantService.getMyNickname();

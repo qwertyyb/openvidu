@@ -112,6 +112,7 @@ export class RecordingService {
 	}
 
 	private startRecordingTime() {
+		this.stopRecordingTime();
 		this.recordingTime = new Date();
 		this.recordingTime.setHours(0, 0, 0, 0);
 		this.recordingTimeInterval = setInterval(() => {
