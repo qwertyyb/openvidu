@@ -35,7 +35,8 @@ import {
 	ParticipantNameDirective,
 	PrejoinDirective,
 	VideoMutedDirective,
-	SimulcastDirective
+	SimulcastDirective,
+	ParticipantModeDirective
 } from './videoconference.directive';
 
 @NgModule({
@@ -48,6 +49,7 @@ import {
 		PrejoinDirective,
 		VideoMutedDirective,
 		SimulcastDirective,
+		ParticipantModeDirective,
 		AudioMutedDirective,
 		ToolbarScreenshareButtonDirective,
 		ToolbarFullscreenButtonDirective,
@@ -87,6 +89,7 @@ import {
 		PrejoinDirective,
 		VideoMutedDirective,
 		SimulcastDirective,
+		ParticipantModeDirective,
 		AudioMutedDirective,
 		ToolbarScreenshareButtonDirective,
 		ToolbarFullscreenButtonDirective,

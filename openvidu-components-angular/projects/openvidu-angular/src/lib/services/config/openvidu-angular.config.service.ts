@@ -3,6 +3,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { OpenViduAngularConfig, ParticipantFactoryFunction } from '../../config/openvidu-angular.config';
 import { BroadcastingError } from '../../models/broadcasting.model';
 import { RecordingInfo } from '../../models/recording.model';
+import { ParticipantMode } from '../../models/participant.model';
 
 // import { version } from '../../../../package.json';
 
@@ -16,6 +17,8 @@ export class OpenViduAngularConfigService {
 	minimalObs: Observable<boolean>;
 	participantName = <BehaviorSubject<string>>new BehaviorSubject('');
 	participantNameObs: Observable<string>;
+	participantMode = <BehaviorSubject<ParticipantMode>> new BehaviorSubject(ParticipantMode.PARTICIPANT);
+	participantModeObs: Observable<ParticipantMode>;
 	prejoin = <BehaviorSubject<boolean>>new BehaviorSubject(true);
 	prejoinObs: Observable<boolean>;
 
@@ -96,6 +99,7 @@ export class OpenViduAngularConfigService {
 		if (this.isProduction()) console.log('OpenVidu Angular Production Mode');
 		this.minimalObs = this.minimal.asObservable();
 		this.participantNameObs = this.participantName.asObservable();
+		this.participantModeObs = this.participantMode.asObservable();
 		this.prejoinObs = this.prejoin.asObservable();
 		this.videoMutedObs = this.videoMuted.asObservable();
 		this.audioMutedObs = this.audioMuted.asObservable();

@@ -591,7 +591,7 @@ export class VideoconferenceComponent implements OnInit, OnDestroy, AfterViewIni
 
 	private async start() {
 		const nickname = this.externalParticipantName || this.storageSrv.getNickname() || `OpenVidu_User${Math.floor(Math.random() * 100)}`;
-		this.participantService.initLocalParticipant({ local: true, nickname });
+		this.participantService.initLocalParticipant({ local: true, nickname, mode: this.libService.participantMode.getValue() });
 		this.openviduService.initialize();
 
 		if (!this.participantService.getLocalParticipant().isViewer()) {

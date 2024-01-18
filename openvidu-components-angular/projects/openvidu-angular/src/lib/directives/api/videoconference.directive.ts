@@ -4,6 +4,7 @@ import { CaptionService } from '../../services/caption/caption.service';
 import { OpenViduAngularConfigService } from '../../services/config/openvidu-angular.config.service';
 import { TranslateService } from '../../services/translate/translate.service';
 import { LangOption } from '../../models/lang.model';
+import { ParticipantMode } from '../../models/participant.model';
 
 /**
  * The **minimal** directive applies a minimal UI hiding all controls except for cam and mic.
@@ -557,6 +558,46 @@ export class SimulcastDirective implements OnDestroy {
 	update(value: boolean) {
 		if (this.libService.simulcast.getValue() !== value) {
 			this.libService.simulcast.next(value);
+		}
+	}
+}
+
+@Directive({
+	selector: 'ov-videoconference[participantMode]'
+})
+export class ParticipantModeDirective implements OnDestroy {
+	/**
+	 * @ignore
+	 */
+	@Input() set participantMode(value: ParticipantMode) {
+		this.update(value);
+	}
+
+	/**
+	 * @ignore
+	 */
+	constructor(public elementRef: ElementRef, private libService: OpenViduAngularConfigService) {}
+
+	/**
+	 * @ignore
+	 */
+	ngOnDestroy(): void {
+		this.clear();
+	}
+
+	/**
+	 * @ignore
+	 */
+	clear() {
+		this.update(ParticipantMode.PARTICIPANT);
+	}
+
+	/**
+	 * @ignore
+	 */
+	update(value: ParticipantMode) {
+		if (this.libService.participantMode.getValue() !== value) {
+			this.libService.participantMode.next(value);
 		}
 	}
 }

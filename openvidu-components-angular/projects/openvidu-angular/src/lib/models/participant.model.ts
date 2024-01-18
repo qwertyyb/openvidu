@@ -63,6 +63,10 @@ export interface ParticipantProperties {
 	 * Whether the participant is muted forcibly or not
 	 */
 	isMutedForcibly?: boolean;
+	/**
+	 * Whether the participant is viewer
+	 */
+	mode?: ParticipantMode;
 }
 
 export abstract class ParticipantAbstractModel {

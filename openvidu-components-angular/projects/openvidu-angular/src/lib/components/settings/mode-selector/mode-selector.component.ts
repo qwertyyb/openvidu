@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ParticipantMode } from '../../../models/participant.model';
 import { ParticipantService } from '../../../services/participant/participant.service';
 import { Subscription } from 'rxjs';
+import { OpenViduAngularConfigService } from '../../../services/config/openvidu-angular.config.service';
 
 /**
  * @internal
@@ -18,11 +19,12 @@ export class ModeSelectorComponent implements OnInit, OnDestroy {
 
 	constructor(
 		protected participantService: ParticipantService,
+    protected configService: OpenViduAngularConfigService
 	) {}
 
   ngOnInit(): void {
-    this.modeSubscription = this.participantService.localParticipantObs.subscribe((value) => {
-      this.selectedMode = value.mode;
+    this.modeSubscription = this.configService.participantModeObs.subscribe((value) => {
+      this.selectedMode = value;
     });
   }
 

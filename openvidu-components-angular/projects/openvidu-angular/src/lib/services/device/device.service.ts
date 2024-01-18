@@ -272,7 +272,7 @@ export class DeviceService {
 
 	private async getOpenViduDevices(): Promise<Device[]> {
 		let devices = (await this.OV?.getDevices()) || [];
-		console.log('getOpenViduDevices', devices)
+		this.log.d('getOpenViduDevices', devices)
 		devices.forEach(device => {
 			if (!device.label) {
 				device.label = device.deviceId

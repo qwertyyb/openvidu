@@ -1,5 +1,5 @@
 import { Component, ElementRef, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { OpenViduService, ParticipantAbstractModel, RecordingInfo, TokenModel, LangOption } from 'openvidu-angular';
+import { OpenViduService, ParticipantAbstractModel, RecordingInfo, TokenModel, LangOption, ParticipantMode } from 'openvidu-angular';
 import { Session } from 'openvidu-browser';
 import { CaptionsLangOption } from '../../../projects/openvidu-angular/src/lib/models/caption.model';
 
@@ -48,6 +48,8 @@ export class OpenviduWebComponentComponent implements OnInit {
 	 * @internal
 	 */
 	_participantName: string;
+
+	_participantMode: ParticipantMode = ParticipantMode.PARTICIPANT;
 	/**
 	 * @internal
 	 */
@@ -267,6 +269,10 @@ export class OpenviduWebComponentComponent implements OnInit {
 	 */
 	@Input() set participantName(value: string) {
 		this._participantName = value;
+	}
+
+	@Input() set participantMode(value: ParticipantMode) {
+		this._participantMode = value;
 	}
 	/**
 	 * The **prejoin** attribute allows show/hide the prejoin page for selecting media devices.

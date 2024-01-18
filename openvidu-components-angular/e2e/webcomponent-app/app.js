@@ -35,6 +35,7 @@ var SESSION_NAME;
 var FAKE_DEVICES;
 
 var PARTICIPANT_NAME;
+var PARTICIPANT_MODE;
 
 var OPENVIDU_SERVER_URL;
 var OPENVIDU_SECRET;
@@ -58,6 +59,7 @@ $(document).ready(() => {
 	CUSTOM_CAPTIONS_LANG_OPTIONS =
 		url.searchParams.get('captionsLangOptions') === null ? false : url.searchParams.get('captionsLangOptions') === 'true';
 	PARTICIPANT_NAME = url.searchParams.get('participantName') || 'TEST_USER';
+	PARTICIPANT_MODE = url.searchParams.get('participantMode') || 'PARTICIPANT'
 	PREJOIN = url.searchParams.get('prejoin') === null ? true : url.searchParams.get('prejoin') === 'true';
 	VIDEO_MUTED = url.searchParams.get('videoMuted') === null ? false : url.searchParams.get('videoMuted') === 'true';
 	AUDIO_MUTED = url.searchParams.get('audioMuted') === null ? false : url.searchParams.get('audioMuted') === 'true';
@@ -251,6 +253,7 @@ async function joinSession(sessionName, participantName) {
 	webComponent.streamDisplayAudioDetection = DISPLAY_AUDIO_DETECTION;
 	webComponent.streamSettingsButton = SETTINGS_BUTTON;
 	webComponent.participantPanelItemMuteButton = PARTICIPANT_MUTE_BUTTON;
+	webComponent.participantMode = PARTICIPANT_MODE;
 
 	webComponent.recordingActivityRecordingsList = [{ status: 'ready' }];
 	webComponent.activitiesPanelRecordingActivity = ACTIVITIES_RECORDING_ACTIVITY;
