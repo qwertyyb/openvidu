@@ -2,21 +2,21 @@
 	"ADMIN": {
 		"LOGIN": "登录",
 		"SECRET": "秘密",
-		"SECRET_REQURED": "必须提供秘密",
+		"SECRET_REQURED": "必须提供密码",
 		"DASHBOARD": "仪表板",
-		"NO_RECORDINGS": "没有录音",
-		"SEARCH": "搜索录音",
+		"NO_RECORDINGS": "没有录制",
+		"SEARCH": "搜索录制",
 		"DATE": "日期",
 		"DURATION": "期间",
 		"SIZE": "尺寸",
 		"STATUS": "地位",
 		"NAME": "姓名",
-		"SESSION": "会议",
+		"SESSION": "会话",
 		"OUTPUT": "输出方式",
 		"POWERED_BY": "动力 b"
 	},
 	"PREJOIN": {
-		"NICKNAME_SECTION": "设置你的绰号",
+		"NICKNAME_SECTION": "设置你的昵称",
 		"NICKNAME": "昵称",
 		"DEVICE_SECTION": "选择你的设备",
 		"VIDEO_DEVICE": "视频设备",
@@ -24,7 +24,7 @@
 		"NO_VIDEO_DEVICE": "未找到视频设备",
 		"NO_AUDIO_DEVICE": "未找到音频设备",
 		"JOIN": "加入会话",
-		"PREPARING": "筹备会议"
+		"PREPARING": "准备中"
 	},
 	"TOOLBAR": {
 		"MUTE_AUDIO": "将你的音频静音",
@@ -39,10 +39,10 @@
 		"ENABLE_CAPTIONS": "启用字幕",
 		"DISABLE_CAPTIONS": "禁用字幕",
 		"BACKGROUND": "背景效果",
-		"START_RECORDING": "开始录音",
+		"START_RECORDING": "开始录制",
 		"STOP_RECORDING": "停止录制",
 		"SETTINGS": "设置",
-		"LEAVE": "离开会议",
+		"LEAVE": "离开会话",
 		"PARTICIPANTS": "参与者",
 		"CHAT": "聊天",
 		"ACTIVITIES": "活动"
@@ -63,7 +63,7 @@
 		"CHAT": {
 			"TITLE": "聊天",
 			"YOU": "你",
-			"SUBTITLE": "信息将在会议结束时被删除",
+			"SUBTITLE": "信息将在会话结束时被删除",
 			"PLACEHOLDER": "发送消息...",
 			"SEND": "发送"
 		},
@@ -89,23 +89,23 @@
 			"IMAGES_SECTION": "背景图像"
 		},
 		"RECORDING": {
-			"TITLE": "录音",
-			"SUBTITLE": "为后人记录你的会议",
+			"TITLE": "录制",
+			"SUBTITLE": "为后人记录你的会话",
 			"CONTENT_TITLE": "记录你的视频通话",
-			"CONTENT_SUBTITLE": "当录音完成后，你将可以轻松地下载它",
-			"STARTING": "开始录音",
+			"CONTENT_SUBTITLE": "当录制完成后，你将可以轻松地下载它",
+			"STARTING": "开始录制",
 			"STOPPING": "停止录制",
 			"PLAY": "玩",
 			"DELETE": "删除",
 			"CANCEL": "取消",
-			"DELETE_QUESTION": "您确定要删除录音吗",
+			"DELETE_QUESTION": "您确定要删除录制吗",
 			"DOWNLOAD": "下载",
 			"RECORDINGS": "录制",
-			"NO_MODERATOR": "只有主持人可以开始录音"
+			"NO_MODERATOR": "只有主持人可以开始录制"
 		},
 		"STREAMING": {
 			"TITLE": "直播",
-			"SUBTITLE": "向观众直播您的会议",
+			"SUBTITLE": "向观众直播您的会话",
 			"CONTENT_SUBTITLE": "OpenVidu需要直播平台的网址。",
 			"START": "开始直播",
 			"STOP": "结束直播",
