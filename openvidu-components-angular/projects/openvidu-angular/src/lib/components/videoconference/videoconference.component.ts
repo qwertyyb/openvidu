@@ -819,9 +819,13 @@ export class VideoconferenceComponent implements OnInit, OnDestroy, AfterViewIni
 		this.localParticipantSub = this.participantService.localParticipantObs.subscribe((() => {
 			let lastIsViewer = null;
 			return (p) => {
-				if (lastIsViewer !== p.isViewer()) {
-					lastIsViewer = p.isViewer();
+				if (lastIsViewer === p.isViewer()) return;
+				lastIsViewer = p.isViewer();
+				if (!lastIsViewer) {
 					this.startPublisher();
+				} else {
+					this.participantService.setMyCameraPublisher(undefined);
+					this.participantService.updateLocalParticipant();
 				}
 			}
 	})())
