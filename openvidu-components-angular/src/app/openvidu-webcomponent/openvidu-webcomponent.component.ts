@@ -166,6 +166,8 @@ export class OpenviduWebComponentComponent implements OnInit {
 	 */
 	_broadcastingActivityBroadcastingError: any;
 
+	@Input() localStreamVisible = true;
+
 	/**
 	 * The **minimal** attribute applies a minimal UI hiding all controls except for cam and mic.
 	 *

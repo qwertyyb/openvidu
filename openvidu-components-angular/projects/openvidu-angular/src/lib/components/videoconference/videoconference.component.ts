@@ -61,6 +61,7 @@ import { LangOption } from '../../models/lang.model';
  * | **captionsLangOptions**            | `CaptionsLangOption []`  | {@link CaptionsLangOptionsDirective}                   |
  * | **prejoin**                        | `boolean` | {@link PrejoinDirective}                        |
  * | **participantName**                | `string`  | {@link ParticipantNameDirective}                |
+ * | **participantMode** 								| `{@link ParticipantMode}` | {@link ParticipantModeDirective} |
  * | **videoMuted**                     | `boolean` | {@link VideoMutedDirective}                     |
  * | **audioMuted**                     | `boolean` | {@link AudioMutedDirective}                     |
    | **simulcast**                      | `boolean` | {@link SimulcastDirective}                      |
@@ -311,6 +312,11 @@ export class VideoconferenceComponent implements OnInit, OnDestroy, AfterViewIni
 	}
 
 	/**
+	 * Show local video stream or not in session
+	 */
+	@Input() localStreamVisible = true;
+
+	/**
 	 * Provides event notifications that fire when join button (in prejoin page) has been clicked.
 	 */
 	@Output() onJoinButtonClicked: EventEmitter<void> = new EventEmitter<void>();
@@ -473,6 +479,7 @@ export class VideoconferenceComponent implements OnInit, OnDestroy, AfterViewIni
 	private externalParticipantName: string;
 	private prejoinSub: Subscription;
 	private participantNameSub: Subscription;
+	private localParticipantSub: Subscription;
 	private langSub: Subscription;
 	private log: ILogger;
 
@@ -500,6 +507,7 @@ export class VideoconferenceComponent implements OnInit, OnDestroy, AfterViewIni
 		if (this.prejoinSub) this.prejoinSub.unsubscribe();
 		if (this.participantNameSub) this.participantNameSub.unsubscribe();
 		if (this.langSub) this.langSub.unsubscribe();
+		this.localParticipantSub?.unsubscribe();
 		this.deviceSrv.clear();
 		await this.openviduService.clear();
 	}
@@ -595,12 +603,9 @@ export class VideoconferenceComponent implements OnInit, OnDestroy, AfterViewIni
 		this.openviduService.initialize();
 
 		if (!this.participantService.getLocalParticipant().isViewer()) {
-			await this.deviceSrv.forceInitDevices();
+			await this.startPublisher()
 		}
-	
-		if (!this.participantService.getLocalParticipant().isViewer() && (this.deviceSrv.hasVideoDeviceAvailable() || this.deviceSrv.hasAudioDeviceAvailable())) {
-			await this.initwebcamPublisher();
-		}
+
 		this.isSessionInitialized = true;
 		this.onSessionCreated.emit(this.openviduService.getWebcamSession());
 		this.onParticipantCreated.emit(this.participantService.getLocalParticipant());
@@ -609,6 +614,14 @@ export class VideoconferenceComponent implements OnInit, OnDestroy, AfterViewIni
 		if (this.nodeCrashed) {
 			this.nodeCrashed = false;
 			this.actionService.closeDialog();
+		}
+	}
+
+	private async startPublisher(): Promise<void> {
+		await this.deviceSrv.forceInitDevices();
+	
+		if (this.deviceSrv.hasVideoDeviceAvailable() || this.deviceSrv.hasAudioDeviceAvailable()) {
+			await this.initwebcamPublisher();
 		}
 	}
 
@@ -802,6 +815,16 @@ export class VideoconferenceComponent implements OnInit, OnDestroy, AfterViewIni
 		this.participantNameSub = this.libService.participantName.subscribe((nickname: string) => {
 			this.externalParticipantName = nickname;
 		});
+
+		this.localParticipantSub = this.participantService.localParticipantObs.subscribe((() => {
+			let lastIsViewer = null;
+			return (p) => {
+				if (lastIsViewer !== p.isViewer()) {
+					lastIsViewer = p.isViewer();
+					this.startPublisher();
+				}
+			}
+	})())
 
 		this.langSub = this.translateService.langSelectedObs.subscribe((lang: LangOption) => {
 			this.onLangChanged.emit(lang);

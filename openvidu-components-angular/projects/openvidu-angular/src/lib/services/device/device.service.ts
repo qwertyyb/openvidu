@@ -92,6 +92,8 @@ export class DeviceService {
 		if (!this.deviceAccessDeniedError) {
 			this.devices = await this.getOpenViduDevices();
 			this.initializeCustomDevices();
+			this.updateAudioDeviceSelected();
+			this.updateVideoDeviceSelected();
 		}
 	}
 

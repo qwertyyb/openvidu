@@ -10,8 +10,19 @@ export enum OpenViduRole {
 	SUBSCRIBER = 'SUBSCRIBER'
 }
 
+/**
+ * user mode
+ * @enum {string}
+ */
 export enum ParticipantMode {
+	/**
+	 * as a viewer, only watch remote stream, can't publish video or audio
+	 */
 	VIEWER = 'VIEWER',
+
+	/**
+	 * as a participant, can watch remote stream, also can publish video or audio
+	 */
 	PARTICIPANT = 'PARTICIPANT'
 }
 
@@ -84,6 +95,7 @@ export abstract class ParticipantAbstractModel {
 		this.nickname = props.nickname;
 		this.colorProfile = !!props.colorProfile ? props.colorProfile : `hsl(${Math.random() * 360}, 100%, 80%)`;
 		this.isMutedForcibly = typeof props.isMutedForcibly === 'boolean' ? props.isMutedForcibly : false;
+		this.mode = props.mode ?? ParticipantMode.PARTICIPANT;
 		let streamModel: StreamModel = {
 			connected: model ? model.connected : true,
 			type: model ? model.type : VideoType.CAMERA,

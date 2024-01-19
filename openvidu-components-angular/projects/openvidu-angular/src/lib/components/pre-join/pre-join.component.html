@@ -53,7 +53,7 @@
 					<ov-user-mode-selector></ov-user-mode-selector>
 				</div>
 
-				<div fxFlex.gt-sm="100%" fxFlex.lt-md="33%" fxLayoutAlign="center center" fxFlexFill class="buttons-container">
+				<div fxFlex.gt-sm="100%" *ngIf="!localParticipant.isViewer()" fxFlex.lt-md="33%" fxLayoutAlign="center center" fxFlexFill class="buttons-container">
 					<h4 *ngIf="windowSize >= 960">{{ 'PREJOIN.DEVICE_SECTION' | translate }}</h4>
 					<hr *ngIf="windowSize >= 960" />
 

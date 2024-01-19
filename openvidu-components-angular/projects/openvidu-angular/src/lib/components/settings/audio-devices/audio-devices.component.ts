@@ -21,7 +21,7 @@ export class AudioDevicesComponent implements OnInit, OnDestroy {
 	@Output() onAudioMutedClicked = new EventEmitter<boolean>();
 	hasAudioDevices: boolean;
 	isAudioMuted: boolean;
-	microphoneSelected: CustomDevice | null;
+	microphoneSelected: CustomDevice | null | undefined;
 	microphones: CustomDevice[] = [];
 	private localParticipantSubscription: Subscription;
 
@@ -34,10 +34,7 @@ export class AudioDevicesComponent implements OnInit, OnDestroy {
 
 	async ngOnInit() {
 		this.subscribeToParticipantMediaProperties();
-		if (this.openviduService.isSessionConnected()) {
-			// Updating devices only with session connected
-			await this.deviceSrv.refreshDevices();
-		}
+		await this.deviceSrv.refreshDevices();
 		this.hasAudioDevices = this.deviceSrv.hasAudioDeviceAvailable();
 		if(this.hasAudioDevices) {
 			this.microphones = this.deviceSrv.getMicrophones();

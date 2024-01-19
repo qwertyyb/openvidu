@@ -71,12 +71,12 @@
     "start": "ng serve --configuration development --open",
     "start-prod": "npx http-server ./dist/openvidu-components-testapp/ --port 4200",
     "start:ssl": "ng serve --ssl --configuration development --host 0.0.0.0 --port 4200 --ssl-cert /path/to/cert.pem --ssl-key /path/to/key.pem",
-    "webcomponent:build": "./node_modules/@angular/cli/bin/ng.js build openvidu-webcomponent --configuration production && node ./openvidu-webcomponent-build.js",
+    "webcomponent:build": "./node_modules/@angular/cli/bin/ng.js build openvidu-webcomponent --configuration production && node ./openvidu-webcomponent-build.js && node scripts/download-font.js",
     "webcomponent:e2e": "tsc --project ./e2e && npx mocha --recursive --timeout 30000 ./e2e/dist/webcomponent.test.js",
     "webcomponent:e2e-ci": "cross-env LAUNCH_MODE=CI npm run webcomponent:e2e",
     "webcomponent:e2e-pro": "tsc --project ./e2e && npx mocha --recursive --timeout 30000 ./e2e/dist/webcomponent.pro.test.js",
     "webcomponent:e2e-pro-ci": "cross-env LAUNCH_MODE=CI npm run webcomponent:e2e-pro",
     "webcomponent:serve-testapp": "npx http-server ./e2e/webcomponent-app/ && echo http://localhost:8080/?OV_URL=https://localhost:4443&OV_SECRET=MY_SECRET&prejoin=false"
   },
-  "version": "2.29.4"
+  "version": "2.29.5"
 }

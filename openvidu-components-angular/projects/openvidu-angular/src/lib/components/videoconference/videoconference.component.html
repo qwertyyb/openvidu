@@ -128,7 +128,7 @@
 </ng-template>
 
 <ng-template #defaultLayout>
-	<ov-layout id="default-layout">
+	<ov-layout id="default-layout" [localStreamVisible]="localStreamVisible">
 		<ng-template #stream let-stream>
 			<ng-container *ngTemplateOutlet="openviduAngularStreamTemplate; context: { $implicit: stream }"> </ng-container>
 		</ng-template>

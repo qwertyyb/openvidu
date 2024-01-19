@@ -25,7 +25,7 @@ export class VideoDevicesComponent implements OnInit, OnDestroy {
 
 	videoMuteChanging: boolean;
 	isVideoMuted: boolean;
-	cameraSelected: CustomDevice | null;
+	cameraSelected: CustomDevice | null | undefined;
 	hasVideoDevices: boolean;
 	cameras: CustomDevice[] = [];
 	localParticipantSubscription: Subscription;
@@ -41,10 +41,7 @@ export class VideoDevicesComponent implements OnInit, OnDestroy {
 
 	async ngOnInit() {
 		this.subscribeToParticipantMediaProperties();
-		if (this.openviduService.isSessionConnected()) {
-			// Updating devices only with session connected
-			await this.deviceSrv.refreshDevices();
-		}
+		await this.deviceSrv.refreshDevices();
 
 		this.hasVideoDevices = this.deviceSrv.hasVideoDeviceAvailable();
 		if (this.hasVideoDevices) {

@@ -4,6 +4,7 @@ import {
 	ChangeDetectorRef,
 	Component,
 	ContentChild,
+	Input,
 	OnDestroy,
 	OnInit,
 	TemplateRef,
@@ -83,6 +84,8 @@ export class LayoutComponent implements OnInit, OnDestroy, AfterViewInit {
 	 * @ignore
 	 */
 	captionsEnabled = true;
+
+	@Input() localStreamVisible = true;
 
 	private localParticipantSubs: Subscription;
 	private remoteParticipantsSubs: Subscription;
