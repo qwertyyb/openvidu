@@ -23,7 +23,7 @@ import { DeviceService } from '../device/device.service';
 import { LoggerService } from '../logger/logger.service';
 import { ParticipantService } from '../participant/participant.service';
 import { PlatformService } from '../platform/platform.service';
-import { ParticipantMode } from '../../models/participant.model';
+import { ParticipantAbstractModel, ParticipantMode, ParticipantModel } from '../../models/participant.model';
 
 @Injectable({
 	providedIn: 'root'
@@ -237,6 +237,37 @@ export class OpenViduService {
 		});
 
 		return this.screenSession.connection.connectionId;
+	}
+
+	async connect(participantService: ParticipantService) {
+		const participant = participantService.getLocalParticipant();
+			const nickname = participant.getNickname();
+			const participantId = participant.id;
+
+			if (participant.hasCameraAndScreenActives()) {
+
+				const webcamSessionId = await this.connectWebcamSession(participantId, nickname, participant.mode);
+				if (webcamSessionId) participantService.setMyCameraConnectionId(webcamSessionId);
+
+				const screenSessionId = await this.connectScreenSession(participantId, nickname);
+				if (screenSessionId) participantService.setMyScreenConnectionId(screenSessionId);
+
+			} else if (participant.hasOnlyScreenActive()) {
+				await this.connectScreenSession(participantId, nickname);
+			} else {
+				await this.connectWebcamSession(participantId, nickname, participant.mode);
+			}
+	}
+
+	async publish(participantService: ParticipantService) {
+		let arr: Promise<void>[] = [];
+		if (this.isWebcamSessionConnected()) {
+			arr.push(this.publishCamera(participantService.getMyCameraPublisher()));
+		}
+		if (this.isScreenSessionConnected()) {
+			arr.push(this.publishScreen(participantService.getMyScreenPublisher()));
+		}
+		await Promise.all(arr);
 	}
 
 	/**

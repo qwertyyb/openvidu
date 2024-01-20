@@ -38,7 +38,7 @@ export interface StreamModel {
 	/**
 	 * The streamManager object from openvidu-browser library.{@link https://docs.openvidu.io/en/stable/api/openvidu-browser/classes/StreamManager.html}
 	 */
-	streamManager: StreamManager | undefined;
+	streamManager: StreamManager | undefined | null;
 	/**
 	 * Whether the stream is enlarged or not
 	 */
@@ -289,7 +289,7 @@ export abstract class ParticipantAbstractModel {
 	/**
 	 * @internal
 	 */
-	setPublisher(connType: VideoType, publisher: StreamManager) {
+	setPublisher(connType: VideoType, publisher: StreamManager | null) {
 		const connection = this.streams.get(connType);
 		if (connection) {
 			connection.streamManager = publisher;

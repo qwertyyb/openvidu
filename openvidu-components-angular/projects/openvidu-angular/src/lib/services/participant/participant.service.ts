@@ -334,7 +334,7 @@ export class ParticipantService {
 	/**
 	 * @internal
 	 */
-	addRemoteConnection(connectionId: string, data: string, subscriber: Subscriber) {
+	addRemoteConnection(connectionId: string, data: string, subscriber: Subscriber | null) {
 		const type: VideoType = this.getTypeConnectionData(data);
 		const streamModel: StreamModel = {
 			type,

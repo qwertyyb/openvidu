@@ -560,7 +560,7 @@ export class ToolbarComponent implements OnInit, OnDestroy, AfterViewInit {
 
 	joinSession() {
 		this.log.d('Join session...');
-		this.openviduService.publishCamera(this.participantService.getMyCameraPublisher());
+		// this.openviduService.publishCamera(this.participantService.getMyCameraPublisher());
 		this.participantService.setMyMode(ParticipantMode.PARTICIPANT);
 		this.onJoinButtonClicked.emit();
 	}

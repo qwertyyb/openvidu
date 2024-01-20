@@ -1,0 +1,12 @@
+{
+  "folders": [
+		{
+			"path": "."
+		},
+	],
+
+	"settings": {
+		"typescript.tsdk": "openvidu-components-angular/node_modules/typescript/lib",
+		"js/ts.implicitProjectConfig.experimentalDecorators": true
+	}
+}

@@ -17,6 +17,7 @@ import {
 	ConnectionEvent,
 	ExceptionEvent,
 	ExceptionEventName,
+	OpenViduErrorName,
 	RecordingEvent,
 	Session,
 	SessionDisconnectedEvent,
@@ -48,7 +49,8 @@ import { PlatformService } from '../../services/platform/platform.service';
 import { RecordingService } from '../../services/recording/recording.service';
 import { TranslateService } from '../../services/translate/translate.service';
 import { VirtualBackgroundService } from '../../services/virtual-background/virtual-background.service';
-import { ParticipantMode } from '../../models/participant.model';
+import { ParticipantAbstractModel, ParticipantMode } from '../../models/participant.model';
+import { DeviceService } from '../../services/device/device.service';
 
 /**
  * @internal
@@ -68,8 +70,8 @@ export class SessionComponent implements OnInit, OnDestroy {
 	@Input() usedInPrejoinPage = false;
 	@Output() onNodeCrashed = new EventEmitter<any>();
 
-	session: Session;
-	sessionScreen: Session;
+	session: Session | null;
+	sessionScreen: Session | null;
 	sideMenu: MatSidenav;
 	sidenavMode: SidenavMode = SidenavMode.SIDE;
 	settingsPanelOpened: boolean;
@@ -82,6 +84,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 	protected layoutWidthSubscription: Subscription;
 	protected updateLayoutInterval: NodeJS.Timer;
 	private captionLanguageSubscription: Subscription;
+	private localParticipantSub: Subscription;
 	protected log: ILogger;
 
 	constructor(
@@ -99,6 +102,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 		private captionService: CaptionService,
 		private platformService: PlatformService,
 		private backgroundService: VirtualBackgroundService,
+		private deviceSrv: DeviceService,
 		private cd: ChangeDetectorRef
 	) {
 		this.log = this.loggerSrv.get('SessionComponent');
@@ -170,6 +174,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 			}
 			this.session = this.openviduService.getWebcamSession();
 			this.sessionScreen = this.openviduService.getScreenSession();
+			
 
 			this.subscribeToOpenViduException();
 			this.subscribeToCaptionLanguage();
@@ -193,6 +198,24 @@ export class SessionComponent implements OnInit, OnDestroy {
 		}
 		this.preparing = false;
 		this.cd.markForCheck();
+
+		this.localParticipantSub = this.participantService.localParticipantObs.subscribe((() => {
+			let lastIsViewer: boolean | null = null;
+			return async (p: ParticipantAbstractModel | null) => {
+				if (!p) return;
+				if (lastIsViewer === p.isViewer()) return;
+				lastIsViewer = p.isViewer();
+				if (!lastIsViewer) {
+					await this.startPublisher();
+					if (!this.usedInPrejoinPage) {
+						await this.openviduService.publish(this.participantService);
+					}
+				} else {
+					this.participantService.setMyCameraPublisher(undefined);
+					this.participantService.updateLocalParticipant();
+				}
+			}
+		})())
 	}
 
 	async ngOnDestroy() {
@@ -207,11 +230,70 @@ export class SessionComponent implements OnInit, OnDestroy {
 			if (this.layoutWidthSubscription) this.layoutWidthSubscription.unsubscribe();
 			if (this.captionLanguageSubscription) this.captionLanguageSubscription.unsubscribe();
 		}
+		this.localParticipantSub?.unsubscribe();
 	}
 
 	leaveSession() {
 		this.log.d('Leaving session...');
 		this.openviduService.disconnect();
+	}
+
+	private async startPublisher(): Promise<void> {
+		if(this.participantService.getMyCameraPublisher()) return;
+
+		await this.deviceSrv.forceInitDevices();
+	
+		if (this.deviceSrv.hasVideoDeviceAvailable() || this.deviceSrv.hasAudioDeviceAvailable()) {
+			await this.initwebcamPublisher();
+		}
+	}
+
+	private async initwebcamPublisher(): Promise<void> {
+		return new Promise(async (resolve, reject) => {
+			try {
+				const pp = {
+					resolution: this.libService.getStreamResolution(),
+					frameRate: this.libService.getStreamFrameRate(),
+					videoSimulcast: this.libService.isSimulcastEnabled()
+				};
+				const publisher = await this.openviduService.initDefaultPublisher(pp);
+
+				if (publisher) {
+					publisher.once('accessDenied', async (e: any) => {
+						await this.handlePublisherError(e);
+						resolve();
+					});
+					publisher.once('accessAllowed', () => {
+						this.participantService.setMyCameraPublisher(publisher);
+						this.participantService.updateLocalParticipant();
+						resolve();
+					});
+				} else {
+					this.participantService.setMyCameraPublisher(undefined);
+					this.participantService.updateLocalParticipant();
+				}
+			} catch (error) {
+				this.actionService.openDialog(error.name.replace(/_/g, ' '), error.message, true);
+				this.log.e(error);
+				reject();
+			}
+		});
+	}
+
+	private async handlePublisherError(e: any): Promise<void> {
+		let message: string = '';
+		if (e.name === OpenViduErrorName.DEVICE_ALREADY_IN_USE) {
+			this.log.w('Video device already in use. Disabling video device...');
+			// Disabling video device
+			// Allow access to the room with only mic
+			this.deviceSrv.disableVideoDevices();
+			return await this.initwebcamPublisher();
+		}
+		if (e.name === OpenViduErrorName.NO_INPUT_SOURCE_SET) {
+			message = this.translateService.translate('ERRORS.DEVICE_NOT_FOUND');
+		}
+		this.actionService.openDialog(e.name.replace(/_/g, ' '), message, true);
+		this.log.e(e.message);
 	}
 
 	protected subscribeToTogglingMenu() {
@@ -254,41 +336,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 
 	private async connectToSession(): Promise<void> {
 		try {
-			const participant = this.participantService.getLocalParticipant();
-			if (location.href.includes('isViewer=1')) {
-				participant.mode = ParticipantMode.VIEWER
-			}
-			const nickname = participant.getNickname();
-			const participantId = participant.id;
-			const screenPublisher = this.participantService.getMyScreenPublisher();
-			const cameraPublisher = this.participantService.getMyCameraPublisher();
-
-			if (participant.hasCameraAndScreenActives()) {
-
-				const webcamSessionId = await this.openviduService.connectWebcamSession(participantId, nickname, participant.mode);
-				if (webcamSessionId) this.participantService.setMyCameraConnectionId(webcamSessionId);
-
-				const screenSessionId = await this.openviduService.connectScreenSession(participantId, nickname);
-				if (screenSessionId) this.participantService.setMyScreenConnectionId(screenSessionId);
-
-				if (participant.isViewer()) {
-					return;
-				}
-				await this.openviduService.publishCamera(cameraPublisher);
-				await this.openviduService.publishScreen(screenPublisher);
-			} else if (participant.hasOnlyScreenActive()) {
-				await this.openviduService.connectScreenSession(participantId, nickname);
-				if (participant.isViewer()) {
-					return;
-				}
-				await this.openviduService.publishScreen(screenPublisher);
-			} else {
-				await this.openviduService.connectWebcamSession(participantId, nickname, participant.mode);
-				if (participant.isViewer()) {
-					return;
-				}
-				await this.openviduService.publishCamera(cameraPublisher);
-			}
+			await this.openviduService.connect(this.participantService);
 		} catch (error) {
 			// this._error.emit({ error: error.error, messgae: error.message, code: error.code, status: error.status });
 			this.log.e('There was an error connecting to the session:', error.code, error.message);
@@ -297,7 +345,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 	}
 
 	private subscribeToOpenViduException() {
-		this.session.on('exception', async (event: ExceptionEvent) => {
+		this.session!.on('exception', async (event: ExceptionEvent) => {
 			if (event.name === ExceptionEventName.SPEECH_TO_TEXT_DISCONNECTED) {
 				this.log.w(event.name, event.message);
 				this.openviduService.setSTTReady(false);
@@ -310,7 +358,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 	}
 
 	private subscribeToConnectionCreatedAndDestroyed() {
-		this.session.on('connectionCreated', async (event: ConnectionEvent) => {
+		this.session!.on('connectionCreated', async (event: ConnectionEvent) => {
 			const connectionId = event.connection?.connectionId;
 			const connectionNickname: string = this.participantService.getNicknameFromConnectionData(event.connection.data);
 			const role = this.participantService.getRoleFromConnectionData(event.connection.data);
@@ -331,7 +379,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 			}
 		});
 
-		this.session.on('connectionDestroyed', (event: ConnectionEvent) => {
+		this.session!.on('connectionDestroyed', (event: ConnectionEvent) => {
 			const nickname: string = this.participantService.getNicknameFromConnectionData(event.connection.data);
 			const isRemoteConnection: boolean = !this.openviduService.isMyOwnConnection(event.connection.connectionId);
 			const isCameraConnection: boolean = !nickname?.includes(`_${VideoType.SCREEN}`);
@@ -343,7 +391,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 	}
 
 	private subscribeToStreamCreated() {
-		this.session.on('streamCreated', async (event: StreamEvent) => {
+		this.session!.on('streamCreated', async (event: StreamEvent) => {
 			const connectionId = event.stream?.connection?.connectionId;
 			const data = event.stream?.connection?.data;
 			const isCameraType: boolean = this.participantService.getTypeConnectionData(data) === VideoType.CAMERA;
@@ -351,7 +399,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 			const lang = this.captionService.getLangSelected().lang;
 
 			if (isRemoteConnection) {
-				const subscriber: Subscriber = this.session.subscribe(event.stream, undefined);
+				const subscriber: Subscriber = this.session!.subscribe(event.stream, undefined);
 				this.participantService.addRemoteConnection(connectionId, data, subscriber);
 				// this.oVSessionService.sendNicknameSignal(event.stream.connection);
 
@@ -372,7 +420,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 	}
 
 	private subscribeToStreamDestroyed() {
-		this.session.on('streamDestroyed', async (event: StreamEvent) => {
+		this.session!.on('streamDestroyed', async (event: StreamEvent) => {
 			const connectionId = event.stream.connection.connectionId;
 			const data = event.stream?.connection?.data;
 			const isRemoteConnection: boolean = !this.openviduService.isMyOwnConnection(connectionId);
@@ -381,7 +429,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 			this.participantService.removeConnectionByConnectionId(connectionId);
 			if (this.openviduService.isSttReady() && this.captionService.areCaptionsEnabled() && isRemoteConnection && isCameraType) {
 				try {
-					await this.session.unsubscribeFromSpeechToText(event.stream);
+					await this.session!.unsubscribeFromSpeechToText(event.stream);
 				} catch (error) {
 					this.log.e('Error unsubscribing from STT: ', error);
 				}
@@ -401,7 +449,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 	}
 
 	private subscribeToStreamPropertyChange() {
-		this.session.on('streamPropertyChanged', (event: StreamPropertyChangedEvent) => {
+		this.session!.on('streamPropertyChanged', (event: StreamPropertyChangedEvent) => {
 			const connectionId = event.stream.connection.connectionId;
 			const isRemoteConnection: boolean = !this.openviduService.isMyOwnConnection(connectionId);
 			if (isRemoteConnection) {
@@ -411,7 +459,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 	}
 
 	private subscribeToNicknameChanged() {
-		this.session.on(`signal:${Signal.NICKNAME_CHANGED}`, (event: any) => {
+		this.session!.on(`signal:${Signal.NICKNAME_CHANGED}`, (event: any) => {
 			const connectionId = event.from.connectionId;
 			const isRemoteConnection: boolean = !this.openviduService.isMyOwnConnection(connectionId);
 
@@ -423,7 +471,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 	}
 
 	private subscribeToReconnection() {
-		this.session.on('reconnecting', () => {
+		this.session!.on('reconnecting', () => {
 			this.log.w('Connection lost: Reconnecting');
 			this.actionService.openDialog(
 				this.translateService.translate('ERRORS.CONNECTION'),
@@ -431,11 +479,11 @@ export class SessionComponent implements OnInit, OnDestroy {
 				false
 			);
 		});
-		this.session.on('reconnected', () => {
+		this.session!.on('reconnected', () => {
 			this.log.w('Connection lost: Reconnected');
 			this.actionService.closeDialog();
 		});
-		this.session.on('sessionDisconnected', (event: SessionDisconnectedEvent) => {
+		this.session!.on('sessionDisconnected', (event: SessionDisconnectedEvent) => {
 			if (event.reason === 'nodeCrashed') {
 				this.actionService.openDialog(
 					this.translateService.translate('ERRORS.CONNECTION'),
@@ -451,18 +499,18 @@ export class SessionComponent implements OnInit, OnDestroy {
 	}
 
 	private subscribeToRecordingEvents() {
-		this.session.on('recordingStarted', (event: RecordingEvent) => this.recordingService.startRecording(event));
+		this.session!.on('recordingStarted', (event: RecordingEvent) => this.recordingService.startRecording(event));
 
-		this.session.on('recordingStopped', (event: RecordingEvent) => this.recordingService.stopRecording(event));
+		this.session!.on('recordingStopped', (event: RecordingEvent) => this.recordingService.stopRecording(event));
 	}
 
 	private subscribeToBroadcastingEvents() {
-		this.session.on('broadcastStarted', () => this.broadcastingService.startBroadcasting());
-		this.session.on('broadcastStopped', () => this.broadcastingService.stopBroadcasting());
+		this.session!.on('broadcastStarted', () => this.broadcastingService.startBroadcasting());
+		this.session!.on('broadcastStopped', () => this.broadcastingService.stopBroadcasting());
 
 		if (!this.isSessionCreator) {
 			// Listen to recording delete events from moderator
-			this.session.on(`signal:${Signal.RECORDING_DELETED}`, () => this.recordingService.forceUpdateRecordings());
+			this.session!.on(`signal:${Signal.RECORDING_DELETED}`, () => this.recordingService.forceUpdateRecordings());
 		}
 	}
 

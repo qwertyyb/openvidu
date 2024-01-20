@@ -479,7 +479,6 @@ export class VideoconferenceComponent implements OnInit, OnDestroy, AfterViewIni
 	private externalParticipantName: string;
 	private prejoinSub: Subscription;
 	private participantNameSub: Subscription;
-	private localParticipantSub: Subscription;
 	private langSub: Subscription;
 	private log: ILogger;
 
@@ -507,7 +506,6 @@ export class VideoconferenceComponent implements OnInit, OnDestroy, AfterViewIni
 		if (this.prejoinSub) this.prejoinSub.unsubscribe();
 		if (this.participantNameSub) this.participantNameSub.unsubscribe();
 		if (this.langSub) this.langSub.unsubscribe();
-		this.localParticipantSub?.unsubscribe();
 		this.deviceSrv.clear();
 		await this.openviduService.clear();
 	}
@@ -602,10 +600,6 @@ export class VideoconferenceComponent implements OnInit, OnDestroy, AfterViewIni
 		this.participantService.initLocalParticipant({ local: true, nickname, mode: this.libService.participantMode.getValue() });
 		this.openviduService.initialize();
 
-		if (!this.participantService.getLocalParticipant().isViewer()) {
-			await this.startPublisher()
-		}
-
 		this.isSessionInitialized = true;
 		this.onSessionCreated.emit(this.openviduService.getWebcamSession());
 		this.onParticipantCreated.emit(this.participantService.getLocalParticipant());
@@ -615,46 +609,6 @@ export class VideoconferenceComponent implements OnInit, OnDestroy, AfterViewIni
 			this.nodeCrashed = false;
 			this.actionService.closeDialog();
 		}
-	}
-
-	private async startPublisher(): Promise<void> {
-		await this.deviceSrv.forceInitDevices();
-	
-		if (this.deviceSrv.hasVideoDeviceAvailable() || this.deviceSrv.hasAudioDeviceAvailable()) {
-			await this.initwebcamPublisher();
-		}
-	}
-
-	private async initwebcamPublisher(): Promise<void> {
-		return new Promise(async (resolve, reject) => {
-			try {
-				const pp = {
-					resolution: this.libService.getStreamResolution(),
-					frameRate: this.libService.getStreamFrameRate(),
-					videoSimulcast: this.libService.isSimulcastEnabled()
-				};
-				const publisher = await this.openviduService.initDefaultPublisher(pp);
-
-				if (publisher) {
-					publisher.once('accessDenied', async (e: any) => {
-						await this.handlePublisherError(e);
-						resolve();
-					});
-					publisher.once('accessAllowed', () => {
-						this.participantService.setMyCameraPublisher(publisher);
-						this.participantService.updateLocalParticipant();
-						resolve();
-					});
-				} else {
-					this.participantService.setMyCameraPublisher(undefined);
-					this.participantService.updateLocalParticipant();
-				}
-			} catch (error) {
-				this.actionService.openDialog(error.name.replace(/_/g, ' '), error.message, true);
-				this.log.e(error);
-				reject();
-			}
-		});
 	}
 
 	/**
@@ -790,22 +744,6 @@ export class VideoconferenceComponent implements OnInit, OnDestroy, AfterViewIni
 		this.onNodeCrashed.emit();
 	}
 
-	private async handlePublisherError(e: any): Promise<void> {
-		let message: string = '';
-		if (e.name === OpenViduErrorName.DEVICE_ALREADY_IN_USE) {
-			this.log.w('Video device already in use. Disabling video device...');
-			// Disabling video device
-			// Allow access to the room with only mic
-			this.deviceSrv.disableVideoDevices();
-			return await this.initwebcamPublisher();
-		}
-		if (e.name === OpenViduErrorName.NO_INPUT_SOURCE_SET) {
-			message = this.translateService.translate('ERRORS.DEVICE_NOT_FOUND');
-		}
-		this.actionService.openDialog(e.name.replace(/_/g, ' '), message, true);
-		this.log.e(e.message);
-	}
-
 	private subscribeToVideconferenceDirectives() {
 		this.prejoinSub = this.libService.prejoin.subscribe((value: boolean) => {
 			this.showPrejoin = value;
@@ -816,21 +754,7 @@ export class VideoconferenceComponent implements OnInit, OnDestroy, AfterViewIni
 			this.externalParticipantName = nickname;
 		});
 
-		this.localParticipantSub = this.participantService.localParticipantObs.subscribe((() => {
-			let lastIsViewer = null;
-			return (p) => {
-				if (lastIsViewer === p.isViewer()) return;
-				lastIsViewer = p.isViewer();
-				if (!lastIsViewer) {
-					this.startPublisher();
-				} else {
-					this.participantService.setMyCameraPublisher(undefined);
-					this.participantService.updateLocalParticipant();
-				}
-			}
-	})())
-
-		this.langSub = this.translateService.langSelectedObs.subscribe((lang: LangOption) => {
+		this.langSub = this.translateService.langSelectedObs.subscribe((lang: LangOption | undefined) => {
 			this.onLangChanged.emit(lang);
 		});
 	}
